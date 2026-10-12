@@ -70,7 +70,7 @@
   .item.off .thumb { opacity: .4; }
   .txt { flex: 1; min-width: 0; }
   .txt .t { font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .txt .t.muted { color: var(--muted); }
+  .txt .t.muted { color: var(--accent); font-weight: 600; }
   .txt .s { color: var(--muted); font-size: 15px; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .txt .m { color: var(--muted); font-size: 12px; margin-top: 4px; }
   .empty { padding: 16px; }
@@ -125,7 +125,10 @@
   .preview { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: linear-gradient(135deg, #525252, #1f1f1f); container-type: size; }
   .preview > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .preview-wrap { padding: 14px 16px 6px; }
-  .preview-wrap .preview { max-width: 560px; margin: 0 auto; }
+  .preview-wrap .preview { max-width: 560px; margin: 0 auto; cursor: pointer; }
+  .preview .sample-tag { position: absolute; right: 10px; bottom: 10px; background: rgba(255,255,255,.92); color: #1c1c1e; font-size: 12px; font-weight: 650; padding: 4px 10px; border-radius: 999px; }
+  .preview .caption.bottom ~ .sample-tag { bottom: auto; top: 10px; }
+  .pnote { max-width: 560px; margin: 10px auto 4px; font-size: 14px; line-height: 1.4; color: var(--muted); }
 
   .caption { position: absolute; inset: 0; pointer-events: none; }
   .caption .shade { position: absolute; left: 0; right: 0; top: 0; height: 50%; background: linear-gradient(to bottom, rgba(0,0,0,.72), rgba(0,0,0,.35) 50%, rgba(0,0,0,0)); }
@@ -165,16 +168,24 @@
   .show .still { z-index: 2; }
   .show .layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
   /* подсказки — на стороне, противоположной подписи */
-  .show .hints { position: absolute; left: 0; right: 0; bottom: 32px; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+  .show .hints { position: absolute; left: 0; right: 0; bottom: 32px; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
   .show.cap-bottom .hints { bottom: auto; top: 32px; flex-direction: column-reverse; }
   .show .hint { background: rgba(0,0,0,.55); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 17px; font-weight: 600; white-space: nowrap; transition: opacity .5s; }
   .show .hint.gone { opacity: 0; }
   .show .hint.sound { background: var(--accent); }
-  /* кнопки, которые появляются по касанию экрана */
-  .show .controls { display: flex; gap: 12px; pointer-events: auto; transition: opacity .3s; }
-  .show .controls.gone { opacity: 0; pointer-events: none; }
-  .show .controls button { border: 1.5px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(20,20,22,.82); color: #fff; font-size: 20px; font-weight: 650; min-height: 60px; padding: 0 28px; box-shadow: 0 6px 20px rgba(0,0,0,.35); white-space: nowrap; }
-  .show .controls button:active { background: rgba(60,60,64,.9); }
+  /* управление показом — появляется по касанию экрана */
+  .show .dim { position: absolute; inset: 0; z-index: 4; background: rgba(0,0,0,.26); opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .show.ctl .dim { opacity: 1; }
+  .show .transport { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 6; display: flex; align-items: center; justify-content: center; gap: 5vmin; opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .show .corner { position: absolute; right: 28px; bottom: 28px; z-index: 6; display: flex; gap: 14px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .show.cap-bottom .corner { bottom: auto; top: 28px; }
+  .show.ctl .transport, .show.ctl .corner { opacity: 1; pointer-events: auto; }
+  .show .ib { border: 0; padding: 0; border-radius: 50%; color: #fff; background: rgba(30,30,32,.42); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); display: flex; align-items: center; justify-content: center; width: 78px; height: 78px; flex: none; transition: transform .12s, background .2s; }
+  .show .ib:active { transform: scale(.92); background: rgba(80,80,84,.6); }
+  .show .ib svg { width: 40%; height: 40%; display: block; }
+  .show .ib.big { width: 108px; height: 108px; }
+  .show .ib.small { width: 54px; height: 54px; }
+  .show .ib.small svg { width: 46%; height: 46%; }
   /* в показе размеры подписи считаем от экрана напрямую */
   .show .caption .ctext { gap: 2vmin; text-shadow: 0 .3vmin 1.2vmin rgba(0,0,0,.45); }
   .show .caption .badge { font-size: 2.4vmin; letter-spacing: .3vmin; padding: .9vmin 2vmin; }
@@ -209,7 +220,7 @@
       </div>
     </div>
     <button class="start" id="startBtn" disabled>▶&nbsp; Запустить показ</button>
-    <div class="note">Чтобы вернуться сюда из показа — коснитесь экрана и нажмите «Настройки». Там же кнопка звука.</div>
+    <div class="note">В показе коснитесь экрана — появятся пауза, следующий и прошлый ролик, звук и шестерёнка (возврат сюда).</div>
   </section>
 
   <h3 class="sect">Что крутится по кругу</h3>
@@ -218,13 +229,13 @@
 
   <h3 class="sect">Подписи</h3>
   <section class="card">
-    <div class="preview-wrap"><div class="preview" id="mainPreview"></div></div>
+    <div class="preview-wrap"><div class="preview" id="mainPreview"></div><p class="pnote" id="previewNote"></p></div>
     <div class="row"><span>Показывать подписи поверх видео</span><label class="sw"><input type="checkbox" id="capOn"><span></span></label></div>
     <div class="row"><span>Где</span><div class="seg" id="placeSeg"><button data-place="top">Сверху</button><button data-place="bottom">Снизу</button></div></div>
-    <div class="row"><span style="flex:none">Плашка</span><input class="inline" id="brandInput" placeholder="Например: НАЗВАНИЕ КОМПАНИИ" autocomplete="off" autocorrect="off"></div>
+    <div class="row"><span style="flex:none">Общая плашка</span><input class="inline" id="brandInput" placeholder="Например: АКЦИЯ или название компании" autocomplete="off" autocorrect="off"></div>
     <div class="row"><span>Цвет плашки</span><div class="swatches" id="swatches"></div></div>
   </section>
-  <p class="foot">Плашка — короткая надпись над заголовком, одна на все ролики. Заголовок и описание пишутся у каждого ролика отдельно.</p>
+  <p class="foot">Плашка — маленькая цветная надпись над заголовком: название компании или слово вроде «АКЦИЯ». Здесь задаётся общая, сразу для всех роликов. В карточке любого ролика можно поставить свою или убрать совсем. Не нужна — оставьте поле пустым.</p>
 
   <h3 class="sect">Показ</h3>
   <section class="card">
@@ -246,10 +257,11 @@
         <option value="60">Каждый час</option>
       </select>
     </div>
+    <div class="row"><span>Ролики с сервера</span><div class="seg" id="modeSeg"><button data-mode="download">Скачивать</button><button data-mode="stream">Не скачивать</button></div></div>
     <div class="row"><button class="linkbtn" id="syncBtn">Обновить с сервера сейчас</button><div class="spin hidden" id="syncSpin"></div></div>
     <div class="status hidden" id="syncStatus"></div>
   </section>
-  <p class="foot">Ссылка на список роликов на вашем сервере (его может обновлять Телеграм-бот) или прямая ссылка на один ролик, только https://. Ролики скачиваются на iPad и крутятся даже без интернета. Что убрали из списка на сервере — уберётся и отсюда.</p>
+  <p class="foot">Ссылка на список роликов на вашем сервере (его может обновлять Телеграм-бот) или прямая ссылка на один ролик, только https://. «Скачивать» — ролики копируются на iPad и крутятся без интернета. «Не скачивать» — iPad каждый раз берёт ролик с сервера: место не занимает, но нужен постоянный интернет. Что убрали из списка на сервере — уберётся и отсюда.</p>
 
   <h3 class="sect">Как пользоваться</h3>
   <section class="card">
@@ -272,6 +284,12 @@
       <div class="card"><input class="field big" id="edTitle" placeholder="Например: Скидка 20% на всё" autocomplete="off"></div>
       <h3 class="sect">Описание</h3>
       <div class="card"><textarea class="field" id="edSub" placeholder="Одна-две строки: цена, акция, телефон"></textarea></div>
+      <h3 class="sect">Плашка над заголовком</h3>
+      <div class="card">
+        <div class="row"><div class="seg" id="edBadgeSeg" style="max-width:none"><button data-mode="common">Общая</button><button data-mode="own">Своя</button><button data-mode="none">Без плашки</button></div></div>
+        <div class="row hidden" id="edBadgeRow"><input class="inline" style="text-align:left" id="edBadge" placeholder="Например: АКЦИЯ" autocomplete="off"></div>
+      </div>
+      <p class="foot" id="edBadgeNote"></p>
       <h3 class="sect">&nbsp;</h3>
       <div class="card">
         <div class="row"><span>Показывать в ротации</span><label class="sw"><input type="checkbox" id="edOn"><span></span></label></div>
@@ -292,13 +310,19 @@
   <img class="still" id="still" alt="">
   <div class="layer" id="capLayer"></div>
   <div class="problem hidden" id="problem"></div>
+  <div class="dim"></div>
   <div class="hints">
-    <div class="hint sound hidden" id="soundHint">🔈 Коснитесь экрана, чтобы включить звук</div>
-    <div class="hint" id="showHint">Коснитесь экрана — появятся кнопки звука и настроек</div>
-    <div class="controls gone" id="controls">
-      <button id="ctlSound">🔊 Звук включён</button>
-      <button id="ctlExit">⚙️ Настройки</button>
-    </div>
+    <div class="hint sound hidden" id="soundHint">Коснитесь экрана, чтобы включить звук</div>
+    <div class="hint" id="showHint">Коснитесь экрана — появятся кнопки управления</div>
+  </div>
+  <div class="transport">
+    <button class="ib" id="ctlPrev" aria-label="Прошлый ролик"></button>
+    <button class="ib big" id="ctlPlay" aria-label="Пауза"></button>
+    <button class="ib" id="ctlNext" aria-label="Следующий ролик"></button>
+  </div>
+  <div class="corner">
+    <button class="ib small" id="ctlSound" aria-label="Звук"></button>
+    <button class="ib small" id="ctlExit" aria-label="Настройки"></button>
   </div>
 </div>
 
@@ -355,7 +379,7 @@ function hideToast() { $('#toast').classList.add('hidden'); }
 // ============ Настройки (маленькие, в памяти браузера) ============
 
 const BADGES = ['#fa5c1f', '#e12933', '#1f73f2', '#21a659', '#141414'];
-const DEFAULTS = { muted: false, fill: true, captions: true, place: 'top', brand: '', badge: 0, imageSeconds: 10, autostart: true, serverURL: '', syncMinutes: 15 };
+const DEFAULTS = { muted: false, fill: true, captions: true, place: 'top', brand: '', badge: 0, imageSeconds: 10, autostart: true, serverURL: '', syncMinutes: 15, serverMode: 'download' };
 let settings = { ...DEFAULTS };
 try { settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem('vitrina.settings') || '{}') }; } catch (e) {}
 function saveSettings() { try { localStorage.setItem('vitrina.settings', JSON.stringify(settings)); } catch (e) {} }
@@ -407,16 +431,17 @@ function forgetURLs(id) {
 const playable = () => items.filter((i) => i.enabled && (i.blob || i.remoteURL));
 
 /** Картинка-превью: кадр из видео или уменьшенное фото */
-function makeThumb(blob, kind) {
+function makeThumb(source, kind) {
   return new Promise((resolve) => {
-    const url = URL.createObjectURL(blob);
+    const remote = typeof source === 'string';   // ссылка на сервер — получится, только если сервер это разрешает
+    const url = remote ? source : URL.createObjectURL(source);
     let finished = false;
     const finish = (value) => {
       if (finished) return;
       finished = true;
       clearTimeout(timer);
-      URL.revokeObjectURL(url);
-      if (probe) probe.remove();
+      if (!remote) URL.revokeObjectURL(url);
+      if (probe) { probe.removeAttribute('src'); try { probe.load(); } catch (e) {} probe.remove(); }
       resolve(value);
     };
     const draw = (source, w, h) => {
@@ -434,11 +459,13 @@ function makeThumb(blob, kind) {
     let probe = null;
     if (kind === 'image') {
       const img = new Image();
+      if (remote) img.crossOrigin = 'anonymous';
       img.onload = () => draw(img, img.naturalWidth, img.naturalHeight);
       img.onerror = () => finish(null);
       img.src = url;
     } else {
       probe = document.createElement('video');
+      if (remote) probe.crossOrigin = 'anonymous';
       probe.muted = true;
       probe.playsInline = true;
       probe.setAttribute('playsinline', '');
@@ -480,6 +507,7 @@ async function addBlob(blob, meta) {
     id: uid(), kind, blob: typed, size: typed.size, thumb: null,
     title: meta.title || '', subtitle: meta.subtitle || '', seconds: meta.seconds ?? null,
     enabled: true, source: meta.source || 'device', remoteURL: meta.remoteURL || null,
+    badgeMode: meta.badge != null ? 'own' : 'common', badgeText: meta.badge || '',
     originalName: name, order: nextOrder(), addedAt: Date.now()
   };
   try { item.thumb = await makeThumb(typed, kind); } catch (e) {}
@@ -498,8 +526,10 @@ async function addRemote(entry, kind) {
     id: uid(), kind, blob: null, size: 0, thumb: null,
     title: entry.title || '', subtitle: entry.subtitle || '', seconds: entry.seconds ?? null,
     enabled: true, source: 'server', remoteURL: entry.url, originalName: fileNameOf(entry.url),
+    badgeMode: entry.badge != null ? 'own' : 'common', badgeText: entry.badge || '',
     order: nextOrder(), addedAt: Date.now()
   };
+  try { item.thumb = await makeThumb(entry.url, kind); } catch (e) {}
   await dbPut(item);
   items.push(item);
   libraryChanged();
@@ -540,13 +570,21 @@ $('#fileInput').addEventListener('change', async (e) => {
     await addBlob(f, { originalName: f.name, source: 'device' });
     left--;
   }
-  if (files.length) toast(files.length === 1 ? 'Добавлено в показ' : `Добавлено в показ: ${files.length}`);
+  if (files.length) toast('Добавлено. Нажмите на ролик в списке, чтобы написать заголовок');
 });
 
 // ============ Подпись ============
 
-function captionHTML(title, subtitle, animate) {
-  const brand = (settings.brand || '').trim();
+/** Какая плашка у ролика: общая, своя или никакой */
+function badgeFor(item) {
+  if (!item) return settings.brand || '';
+  if (item.badgeMode === 'none') return '';
+  if (item.badgeMode === 'own') return item.badgeText || '';
+  return settings.brand || '';
+}
+
+function captionHTML(title, subtitle, animate, badgeText) {
+  const brand = String(badgeText ?? settings.brand ?? '').trim();
   const t = (title || '').trim();
   const s = (subtitle || '').trim();
   if (!settings.captions || (!brand && !t && !s)) return '';
@@ -555,9 +593,9 @@ function captionHTML(title, subtitle, animate) {
     <div class="ctext">${brand ? `<span class="badge">${esc(brand)}</span>` : ''}${t ? `<div class="ctitle">${esc(t)}</div>` : ''}${s ? `<div class="csub">${esc(s)}</div>` : ''}</div>
   </div>`;
 }
-function previewHTML(item, title, subtitle) {
+function previewHTML(item, title, subtitle, badgeText) {
   const thumb = item && thumbFor(item);
-  return (thumb ? `<img src="${thumb}" alt="">` : '') + captionHTML(title, subtitle, false);
+  return (thumb ? `<img src="${thumb}" alt="">` : '') + captionHTML(title, subtitle, false, badgeText);
 }
 
 // ============ Экран настроек ============
@@ -603,7 +641,7 @@ function renderList() {
     return `<div class="item${it.enabled ? '' : ' off'}" data-id="${it.id}">
       <div class="thumb">${thumb ? `<img src="${thumb}" alt="">` : (it.kind === 'video' ? '🎬' : '🖼')}${it.kind === 'video' ? '<span class="play">▶</span>' : ''}</div>
       <div class="txt">
-        <div class="t${it.title ? '' : ' muted'}">${esc(it.title || 'Без заголовка')}</div>
+        <div class="t${it.title ? '' : ' muted'}">${esc(it.title || 'Нажмите, чтобы написать заголовок')}</div>
         ${it.subtitle ? `<div class="s">${esc(it.subtitle)}</div>` : ''}
         <div class="m">${esc(meta)}</div>
       </div>
@@ -627,9 +665,17 @@ $('#list').addEventListener('change', (e) => {
 
 function renderMainPreview() {
   const sample = items.find((i) => i.title) || items[0];
+  const own = !!(sample && (sample.title || sample.subtitle));
   $('#mainPreview').innerHTML = previewHTML(sample,
-    sample && sample.title ? sample.title : 'Ваш заголовок крупно',
-    sample && sample.subtitle ? sample.subtitle : 'Описание помельче: цена, акция, телефон');
+    own ? sample.title : 'Ваш заголовок крупно',
+    own ? sample.subtitle : 'Описание помельче: цена, акция, телефон',
+    badgeFor(sample)) + (own ? '' : '<span class="sample-tag">Образец</span>');
+  $('#mainPreview').dataset.id = sample ? sample.id : '';
+  $('#previewNote').textContent = !items.length
+    ? 'Это образец. Когда добавите ролики, нажмите на любой в списке — там пишутся его заголовок и описание.'
+    : own
+      ? 'Так выглядит подпись одного из ваших роликов. Изменить — нажмите на ролик в списке выше.'
+      : 'Это образец. Чтобы написать свой заголовок и описание, нажмите на ролик в списке выше — или прямо на эту картинку.';
 }
 
 function renderSettingsControls() {
@@ -643,6 +689,7 @@ function renderSettingsControls() {
   $('#imgSecLabel').textContent = `Фото на экране: ${settings.imageSeconds} сек`;
   if (document.activeElement !== $('#serverInput')) $('#serverInput').value = settings.serverURL;
   $('#syncSel').value = String(settings.syncMinutes);
+  document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.mode === settings.serverMode));
   renderSync();
 }
 
@@ -662,6 +709,7 @@ function setSetting(key, value) {
   if (key === 'fill') $('#show').classList.toggle('fit', !settings.fill);
 }
 
+$('#mainPreview').addEventListener('click', () => { const id = $('#mainPreview').dataset.id; if (id) openEditor(id); });
 $('#capOn').addEventListener('change', (e) => setSetting('captions', e.target.checked));
 $('#placeSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setSetting('place', b.dataset.place); });
 $('#brandInput').addEventListener('input', (e) => { settings.brand = e.target.value; saveSettings(); renderMainPreview(); });
@@ -675,6 +723,11 @@ $('#imgSecStep').addEventListener('click', (e) => {
 });
 $('#serverInput').addEventListener('change', (e) => setSetting('serverURL', e.target.value.trim()));
 $('#syncSel').addEventListener('change', (e) => setSetting('syncMinutes', Number(e.target.value)));
+$('#modeSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b || b.dataset.mode === settings.serverMode) return;
+  setSetting('serverMode', b.dataset.mode);
+  if ((settings.serverURL || '').trim()) syncServer();   // сразу применяем: скачать или, наоборот, освободить место
+});
 $('#syncBtn').addEventListener('click', () => { settings.serverURL = $('#serverInput').value.trim(); saveSettings(); syncServer(); });
 $('#startBtn').addEventListener('click', () => startShow(true));
 
@@ -685,7 +738,9 @@ let draft = null;
 function openEditor(id) {
   const item = items.find((i) => i.id === id);
   if (!item) return;
-  draft = { id: item.id, title: item.title, subtitle: item.subtitle, enabled: item.enabled, seconds: item.seconds };
+  draft = { id: item.id, title: item.title, subtitle: item.subtitle, enabled: item.enabled, seconds: item.seconds,
+            badgeMode: item.badgeMode || 'common', badgeText: item.badgeText || '' };
+  $('#edBadge').value = draft.badgeText;
   $('#edHead').textContent = item.kind === 'video' ? 'Ролик' : 'Фото';
   $('#edTitle').value = draft.title;
   $('#edSub').value = draft.subtitle;
@@ -706,7 +761,13 @@ function openEditor(id) {
 function renderEditor() {
   const item = items.find((i) => i.id === draft.id);
   if (!item) return closeEditor();
-  $('#edPreview').innerHTML = previewHTML(item, draft.title, draft.subtitle);
+  $('#edPreview').innerHTML = previewHTML(item, draft.title, draft.subtitle, badgeFor(draft));
+  document.querySelectorAll('#edBadgeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.mode === draft.badgeMode));
+  $('#edBadgeRow').classList.toggle('hidden', draft.badgeMode !== 'own');
+  const common = (settings.brand || '').trim();
+  $('#edBadgeNote').textContent = draft.badgeMode === 'common'
+    ? (common ? `Общая плашка сейчас: «${common}». Меняется в разделе «Подписи».` : 'Общая плашка пока не задана — её пишут в разделе «Подписи».')
+    : draft.badgeMode === 'own' ? 'Эта надпись будет только у этого ролика.' : 'У этого ролика плашки не будет.';
   $('#edSecLabel').textContent = `На экране: ${draft.seconds || settings.imageSeconds} сек`;
   const pos = items.indexOf(item);
   $('#edPos').textContent = `Место в круге: ${pos + 1} из ${items.length}`;
@@ -720,6 +781,13 @@ $('#sheet').addEventListener('click', (e) => { if (e.target.closest('[data-close
 $('#edTitle').addEventListener('input', (e) => { draft.title = e.target.value; renderEditor(); });
 $('#edSub').addEventListener('input', (e) => { draft.subtitle = e.target.value; renderEditor(); });
 $('#edOn').addEventListener('change', (e) => { draft.enabled = e.target.checked; });
+$('#edBadgeSeg').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  draft.badgeMode = b.dataset.mode;
+  renderEditor();
+  if (draft.badgeMode === 'own') $('#edBadge').focus();
+});
+$('#edBadge').addEventListener('input', (e) => { draft.badgeText = e.target.value; renderEditor(); });
 $('#edSecStep').addEventListener('click', (e) => {
   const b = e.target.closest('button'); if (!b) return;
   draft.seconds = Math.min(120, Math.max(3, (draft.seconds || settings.imageSeconds) + Number(b.dataset.step)));
@@ -734,6 +802,8 @@ $('#edSave').addEventListener('click', () => {
     item.subtitle = draft.subtitle.trim();
     item.enabled = draft.enabled;
     item.seconds = draft.seconds;
+    item.badgeMode = draft.badgeMode;
+    item.badgeText = draft.badgeText.trim();
     saveItem(item);
   }
   closeEditor();
@@ -765,7 +835,7 @@ function parsePlaylist(text, base) {
     if (!list && json && typeof json === 'object') list = json.items || json.videos || json.playlist || json.files || null;
     if (!Array.isArray(list)) return null;
     return list.map((e) => {
-      if (typeof e === 'string') { const url = makeURL(e, base); return url && { url, title: null, subtitle: null, seconds: null }; }
+      if (typeof e === 'string') { const url = makeURL(e, base); return url && { url, title: null, subtitle: null, seconds: null, badge: null }; }
       if (!e || typeof e !== 'object') return null;
       const url = makeURL(e.url || e.src || e.file || e.video || '', base);
       if (!url) return null;
@@ -774,7 +844,8 @@ function parsePlaylist(text, base) {
         url,
         title: typeof e.title === 'string' ? e.title : null,
         subtitle: typeof (e.description ?? e.subtitle ?? e.text) === 'string' ? (e.description ?? e.subtitle ?? e.text) : null,
-        seconds: Number.isFinite(seconds) && seconds > 0 ? seconds : null
+        seconds: Number.isFinite(seconds) && seconds > 0 ? seconds : null,
+        badge: typeof e.badge === 'string' ? e.badge : null
       };
     }).filter(Boolean);
   }
@@ -786,7 +857,7 @@ function parsePlaylist(text, base) {
     const url = makeURL(parts[0], base);
     // только строки, похожие на ссылку на ролик, — чтобы страница с ошибкой не стёрла показ
     if (!url || !(/^https?:\/\//i.test(parts[0]) || kindOf(url))) continue;
-    out.push({ url, title: parts[1] ?? null, subtitle: parts[2] ?? null, seconds: null });
+    out.push({ url, title: parts[1] ?? null, subtitle: parts[2] ?? null, seconds: null, badge: parts[3] ?? null });
   }
   return out.length ? out : null;
 }
@@ -820,7 +891,7 @@ async function syncServer() {
 
     let entries;
     if (kindOf(base)) {
-      entries = [{ url: base, title: null, subtitle: null, seconds: null }];
+      entries = [{ url: base, title: null, subtitle: null, seconds: null, badge: null }];
     } else {
       setSync('Читаю список роликов…');
       const r = await fetch(base, { cache: 'no-store' });
@@ -829,6 +900,7 @@ async function syncServer() {
       if (!entries) throw new Error('по ссылке нет списка роликов — формат описан в инструкции');
     }
 
+    const stream = settings.serverMode === 'stream';
     let added = 0, errors = 0, streaming = 0;
     for (let n = 0; n < entries.length; n++) {
       const e = entries[n];
@@ -838,7 +910,16 @@ async function syncServer() {
         if (e.title !== null && e.title !== existing.title) { existing.title = e.title; changed = true; }
         if (e.subtitle !== null && e.subtitle !== existing.subtitle) { existing.subtitle = e.subtitle; changed = true; }
         if (e.seconds !== null && e.seconds !== existing.seconds) { existing.seconds = e.seconds; changed = true; }
-        if (!existing.blob) {
+        if (e.badge !== null && (existing.badgeMode !== 'own' || existing.badgeText !== e.badge)) { existing.badgeMode = 'own'; existing.badgeText = e.badge; changed = true; }
+        if (stream) {
+          // режим «не скачивать»: освобождаем место, дальше показываем по ссылке
+          if (existing.blob) {
+            existing.blob = null;
+            existing.size = 0;
+            if (srcURLs.has(existing.id)) { URL.revokeObjectURL(srcURLs.get(existing.id)); srcURLs.delete(existing.id); }
+            changed = true;
+          }
+        } else if (!existing.blob) {
           // раньше не скачался — пробуем ещё раз
           try {
             const blob = withType(await download(e.url), existing.originalName);
@@ -852,11 +933,17 @@ async function syncServer() {
         if (changed) { try { await dbPut(existing); } catch (err) {} }
         continue;
       }
+      if (stream) {
+        setSync(`Добавляю ${n + 1} из ${entries.length}…`);
+        await addRemote(e, kindOf(e.url) || 'video');
+        added++;
+        continue;
+      }
       setSync(`Скачиваю ${n + 1} из ${entries.length}…`);
       let blob = null;
       try { blob = await download(e.url); } catch (err) { blob = null; }
       if (blob) {
-        const item = await addBlob(blob, { originalName: fileNameOf(e.url), source: 'server', remoteURL: e.url, title: e.title || '', subtitle: e.subtitle || '', seconds: e.seconds });
+        const item = await addBlob(blob, { originalName: fileNameOf(e.url), source: 'server', remoteURL: e.url, title: e.title || '', subtitle: e.subtitle || '', seconds: e.seconds, badge: e.badge });
         if (item) added++; else errors++;
       } else {
         const kind = kindOf(e.url);
@@ -873,6 +960,7 @@ async function syncServer() {
 
     let msg = `Обновлено в ${hhmm()}: на сервере ${entries.length}, новых ${added}`;
     if (stale.length) msg += `, убрано ${stale.length}`;
+    if (stream) msg += '. Ролики показываются прямо с сервера, место на iPad не занимают';
     if (streaming) msg += `. Не скачалось ${streaming} — они показываются прямо с сервера, пока есть интернет`;
     if (errors) msg += `, с ошибкой ${errors}`;
     setSync(msg, errors > 0);
@@ -905,7 +993,21 @@ let standby = vB;
 let unlocked = false;     // звук разрешён только после касания экрана
 let wakeLock = null;
 
-const show = { running: false, list: [], index: 0, currentId: null, currentKind: null, standbyId: null, timer: null, failures: 0, hintTimer: null };
+const show = { running: false, list: [], index: 0, currentId: null, currentKind: null, standbyId: null, timer: null, failures: 0, hintTimer: null,
+               userPaused: false, stillLeft: 0, stillStarted: 0, stuckAt: 0 };
+
+const ICON = {
+  prev: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 1-2 0v-13a1 1 0 0 1 2 0zM20 6.3v11.4a1 1 0 0 1-1.55.83l-8.7-5.7a1 1 0 0 1 0-1.66l8.7-5.7A1 1 0 0 1 20 6.3z"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 5.5v13a1 1 0 0 0 2 0v-13a1 1 0 0 0-2 0zM4 6.3v11.4a1 1 0 0 0 1.55.83l8.7-5.7a1 1 0 0 0 0-1.66l-8.7-5.7A1 1 0 0 0 4 6.3z"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.1-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.2" height="15" rx="1.2"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2"/></svg>',
+  soundOn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/></svg>',
+  soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="m16 9.5 5 5"/><path d="m21 9.5-5 5"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+};
+$('#ctlPrev').innerHTML = ICON.prev;
+$('#ctlNext').innerHTML = ICON.next;
+$('#ctlExit').innerHTML = ICON.gear;
 
 function unlockMedia() {
   unlocked = true;
@@ -913,7 +1015,7 @@ function unlockMedia() {
     try {
       const p = v.play();
       if (p) p.catch(() => {});
-      if (v !== active || show.currentKind !== 'video') v.pause();
+      if (v !== active || show.currentKind !== 'video' || show.userPaused) v.pause();
     } catch (e) {}
   }
 }
@@ -924,7 +1026,7 @@ function setTapHint(kind) {
   tapHint = kind;
   const el = $('#soundHint');
   el.classList.toggle('hidden', !kind);
-  if (kind) el.textContent = kind === 'play' ? '▶ Коснитесь экрана, чтобы запустить показ' : '🔈 Коснитесь экрана, чтобы включить звук';
+  if (kind) el.textContent = kind === 'play' ? 'Коснитесь экрана, чтобы запустить показ' : 'Коснитесь экрана, чтобы включить звук';
 }
 
 function playEl(el) {
@@ -942,20 +1044,59 @@ function playEl(el) {
   });
 }
 
-// Кнопки «звук» и «настройки» — показываются на несколько секунд после касания
+// Управление показом — появляется на несколько секунд после касания; на паузе не прячется
 let controlsTimer = null;
 function renderControls() {
-  $('#ctlSound').textContent = settings.muted ? '🔇 Звук выключен' : '🔊 Звук включён';
+  const play = $('#ctlPlay');
+  play.innerHTML = show.userPaused ? ICON.play : ICON.pause;
+  play.setAttribute('aria-label', show.userPaused ? 'Продолжить' : 'Пауза');
+  const sound = $('#ctlSound');
+  sound.innerHTML = settings.muted ? ICON.soundOff : ICON.soundOn;
+  sound.setAttribute('aria-label', settings.muted ? 'Звук выключен' : 'Звук включён');
 }
 function showControls() {
   renderControls();
-  $('#controls').classList.remove('gone');
+  showEl.classList.add('ctl');
   clearTimeout(controlsTimer);
-  controlsTimer = setTimeout(() => $('#controls').classList.add('gone'), 6000);
+  if (!show.userPaused) controlsTimer = setTimeout(hideControls, 6000);
 }
 function hideControls() {
   clearTimeout(controlsTimer);
-  $('#controls').classList.add('gone');
+  showEl.classList.remove('ctl');
+}
+
+function startStillTimer(ms) {
+  clearTimeout(show.timer);
+  show.stillLeft = ms;
+  show.stillStarted = Date.now();
+  show.timer = setTimeout(() => { show.failures = 0; advance(false); }, ms);
+}
+
+function setPaused(paused) {
+  if (!show.running || !show.currentId) return;
+  show.userPaused = paused;
+  if (show.currentKind === 'video') {
+    if (paused) active.pause(); else playEl(active);
+  } else if (paused) {
+    clearTimeout(show.timer);
+    show.stillLeft = Math.max(1000, show.stillLeft - (Date.now() - show.stillStarted));
+  } else {
+    startStillTimer(show.stillLeft);
+  }
+  showControls();
+}
+
+/** Следующий (+1) или прошлый (−1) ролик */
+function step(delta) {
+  if (!show.running || !show.list.length) return;
+  show.failures = 0;
+  if (delta > 0) {
+    advance(false);
+  } else {
+    show.index = (show.index - 1 + show.list.length) % show.list.length;
+    playCurrent(true);
+  }
+  showControls();
 }
 
 function warm(el) {
@@ -976,7 +1117,7 @@ function setProblem(html) {
 }
 
 function setCaption(item, animate) {
-  $('#capLayer').innerHTML = item ? captionHTML(item.title, item.subtitle, animate) : '';
+  $('#capLayer').innerHTML = item ? captionHTML(item.title, item.subtitle, animate, badgeFor(item)) : '';
 }
 
 async function requestWake() {
@@ -990,6 +1131,8 @@ function startShow(fromTap) {
   show.failures = 0;
   show.index = 0;
   show.standbyId = null;
+  show.userPaused = false;
+  show.stuckAt = 0;
   document.body.classList.add('showing');
   showEl.classList.remove('hidden');
   showEl.classList.toggle('fit', !settings.fill);
@@ -1016,6 +1159,8 @@ function startShow(fromTap) {
 
 function stopShow() {
   show.running = false;
+  show.userPaused = false;
+  show.stuckAt = 0;
   clearTimeout(show.timer);
   for (const v of [vA, vB]) {
     v.pause();
@@ -1053,13 +1198,15 @@ function loadInto(el, item) {
 function playCurrent(reset) {
   clearTimeout(show.timer);
   if (!show.running) return;
+  show.userPaused = false;
+  show.stuckAt = 0;
   if (!show.list.length) {
     show.currentId = null;
     show.currentKind = null;
     for (const v of [vA, vB]) { v.pause(); v.classList.remove('on'); }
     still.classList.remove('on');
     setCaption(null);
-    setProblem('Нет роликов для показа.<br>Коснитесь экрана и нажмите «Настройки», чтобы добавить видео.');
+    setProblem('Нет роликов для показа.<br>Коснитесь экрана и нажмите на шестерёнку, чтобы добавить видео.');
     return;
   }
   if (show.index >= show.list.length || show.index < 0) show.index = 0;
@@ -1093,10 +1240,10 @@ function playCurrent(reset) {
     still.onerror = () => { if (show.currentId === item.id) skipBroken(); };
     still.src = srcFor(item);
     still.classList.add('on');
-    const secs = Math.max(2, item.seconds || settings.imageSeconds || 10);
-    show.timer = setTimeout(() => { show.failures = 0; advance(false); }, secs * 1000);
+    startStillTimer(Math.max(2, item.seconds || settings.imageSeconds || 10) * 1000);
   }
   if (!sameAsBefore || reset) setCaption(item, true);
+  renderControls();
   preloadNext();
 }
 
@@ -1124,7 +1271,8 @@ function skipBroken() {
     for (const v of [vA, vB]) { v.pause(); v.classList.remove('on'); }
     still.classList.remove('on');
     setCaption(null);
-    setProblem('Не получается показать ни один файл.<br>Коснитесь экрана, нажмите «Настройки» и проверьте ролики.');
+    setProblem('Не получается показать ролики.<br>Проверьте интернет. Пробую снова каждые 15 секунд.');
+    show.stuckAt = Date.now();
     return;
   }
   advance(true);
@@ -1166,7 +1314,13 @@ function libraryChanged() {
 
 /** Раз в 5 секунд: если видео почему-то встало — запускаем снова */
 function watchdog() {
-  if (!show.running || show.currentKind !== 'video') return;
+  if (!show.running || show.userPaused) return;
+  if (show.stuckAt) {
+    // ничего не показывается (например, пропал интернет) — пробуем заново
+    if (Date.now() - show.stuckAt > 15000 && show.list.length) { show.failures = 0; playCurrent(true); }
+    return;
+  }
+  if (show.currentKind !== 'video') return;
   if (active.ended && !active.loop) { advance(false); return; }
   if (active.paused) playEl(active);
 }
@@ -1186,23 +1340,34 @@ showEl.addEventListener('pointerdown', () => {
 });
 for (const type of ['pointerup', 'pointercancel']) showEl.addEventListener(type, () => clearTimeout(pressTimer));
 showEl.addEventListener('click', (e) => {
-  if (longPressed || !show.running || e.target.closest('#controls')) return;
+  if (longPressed || !show.running || e.target.closest('.transport, .corner')) return;
+  const wasVisible = showEl.classList.contains('ctl');
   if (!unlocked || tapHint === 'play') unlockMedia();
-  if (show.currentKind === 'video') playEl(active);
+  if (show.currentKind === 'video' && !show.userPaused) playEl(active);
   setTapHint(null);
-  showControls();
+  // касание по пустому месту: показать кнопки, а если они уже видны — спрятать
+  if (wasVisible && !show.userPaused) hideControls(); else showControls();
 });
+$('#ctlPlay').addEventListener('click', () => setPaused(!show.userPaused));
+$('#ctlPrev').addEventListener('click', () => step(-1));
+$('#ctlNext').addEventListener('click', () => step(1));
 $('#ctlSound').addEventListener('click', () => {
   if (!show.running) return;
   settings.muted = !settings.muted;
   saveSettings();
   if (!unlocked) unlockMedia();
-  if (show.currentKind === 'video') playEl(active);
+  if (show.currentKind === 'video') { if (show.userPaused) active.muted = settings.muted; else playEl(active); }
   setTapHint(null);
   showControls();
 });
 $('#ctlExit').addEventListener('click', () => { if (show.running) stopShow(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && show.running) stopShow(); });
+document.addEventListener('keydown', (e) => {
+  if (!show.running) return;
+  if (e.key === 'Escape') stopShow();
+  else if (e.key === ' ') { e.preventDefault(); setPaused(!show.userPaused); }
+  else if (e.key === 'ArrowRight') step(1);
+  else if (e.key === 'ArrowLeft') step(-1);
+});
 showEl.addEventListener('contextmenu', (e) => e.preventDefault());
 // после долгого нажатия не даём «пальцу» нажать кнопку под ним
 document.addEventListener('click', (e) => {

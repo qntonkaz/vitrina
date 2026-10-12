@@ -1,6 +1,6 @@
 // Держит саму страницу на iPad, чтобы «Витрина» открывалась и без интернета.
 // Ролики сюда не попадают — они лежат в хранилище страницы.
-const CACHE = 'vitrina-v2';
+const CACHE = 'vitrina-v3';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
