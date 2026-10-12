@@ -156,7 +156,7 @@
   .toast .spin { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
 
   /* показ */
-  .show { position: fixed; inset: 0; background: #000; z-index: 50; overflow: hidden; container-type: size; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+  .show { position: fixed; inset: 0; background: #000; z-index: 50; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
   .show video, .show .still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
   .show.fit video, .show.fit .still { object-fit: contain; }
   .show video { z-index: 0; }
@@ -170,6 +170,20 @@
   .show .hint { background: rgba(0,0,0,.55); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 17px; font-weight: 600; white-space: nowrap; transition: opacity .5s; }
   .show .hint.gone { opacity: 0; }
   .show .hint.sound { background: var(--accent); }
+  /* кнопки, которые появляются по касанию экрана */
+  .show .controls { display: flex; gap: 12px; pointer-events: auto; transition: opacity .3s; }
+  .show .controls.gone { opacity: 0; pointer-events: none; }
+  .show .controls button { border: 1.5px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(20,20,22,.82); color: #fff; font-size: 20px; font-weight: 650; min-height: 60px; padding: 0 28px; box-shadow: 0 6px 20px rgba(0,0,0,.35); white-space: nowrap; }
+  .show .controls button:active { background: rgba(60,60,64,.9); }
+  /* в показе размеры подписи считаем от экрана напрямую */
+  .show .caption .ctext { gap: 2vmin; text-shadow: 0 .3vmin 1.2vmin rgba(0,0,0,.45); }
+  .show .caption .badge { font-size: 2.4vmin; letter-spacing: .3vmin; padding: .9vmin 2vmin; }
+  .show .caption .ctitle { font-size: 7.8vmin; letter-spacing: -.1vmin; }
+  .show .caption .csub { font-size: 3.6vmin; }
+  .show .caption.enter .ctext { animation-name: showCapTop; }
+  .show .caption.bottom.enter .ctext { animation-name: showCapBottom; }
+  @keyframes showCapTop { from { opacity: 0; transform: translateY(-3vmin); } to { opacity: 1; transform: none; } }
+  @keyframes showCapBottom { from { opacity: 0; transform: translateY(3vmin); } to { opacity: 1; transform: none; } }
   .show .problem { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; text-align: center; color: rgba(255,255,255,.85); font-size: 22px; line-height: 1.45; padding: 40px; pointer-events: none; }
 </style>
 </head>
@@ -195,7 +209,7 @@
       </div>
     </div>
     <button class="start" id="startBtn" disabled>▶&nbsp; Запустить показ</button>
-    <div class="note">Чтобы вернуться сюда из показа — удерживайте палец на экране пару секунд.</div>
+    <div class="note">Чтобы вернуться сюда из показа — коснитесь экрана и нажмите «Настройки». Там же кнопка звука.</div>
   </section>
 
   <h3 class="sect">Что крутится по кругу</h3>
@@ -219,7 +233,7 @@
     <div class="row"><span id="imgSecLabel">Фото на экране: 10 сек</span><div class="stepper" id="imgSecStep"><button data-step="-1">−</button><button data-step="1">+</button></div></div>
     <div class="row"><span>Сразу начинать показ при открытии</span><label class="sw"><input type="checkbox" id="autoOn"><span></span></label></div>
   </section>
-  <p class="foot">«Заполнять весь экран» — видео растягивается без чёрных полос, края могут обрезаться. Со звуком: после открытия коснитесь экрана один раз — так требует iPad.</p>
+  <p class="foot">«Заполнять весь экран» — видео растягивается без чёрных полос, края могут обрезаться. Со звуком: после открытия коснитесь экрана один раз — так требует iPad. Звук можно включать и выключать прямо в показе.</p>
 
   <h3 class="sect">С сервера</h3>
   <section class="card">
@@ -242,7 +256,7 @@
     <div class="help"><div class="ic">📲</div><div><b>Значок на экране «Домой»</b><span>Safari → «Поделиться» → «На экран «Домой»». Открывайте Витрину через значок — так ролики хранятся надёжно.</span></div></div>
     <div class="help"><div class="ic">📱</div><div><b>С айфона или Мака по AirDrop</b><span>Отправьте видео на iPad — оно ляжет в галерею. Потом здесь: «Добавить» → «Медиатека».</span></div></div>
     <div class="help"><div class="ic">🔆</div><div><b>Чтобы экран не гас</b><span>Настройки → Экран и яркость → Автоблокировка → Никогда. Режим энергосбережения лучше выключить — с ним видео может не запускаться само.</span></div></div>
-    <div class="help"><div class="ic">🔒</div><div><b>Чтобы никто не вышел из показа</b><span>Настройки → Универсальный доступ → Гид-доступ. В показе трижды нажмите кнопку «Домой».</span></div></div>
+    <div class="help"><div class="ic">🔒</div><div><b>Чтобы никто не вышел из показа</b><span>Настройки → Универсальный доступ → Гид-доступ, в параметрах выключите «Касание». В показе трижды нажмите кнопку «Домой» — экран перестанет реагировать на пальцы.</span></div></div>
   </section>
   <p class="foot" id="storageNote"></p>
 </div>
@@ -280,7 +294,11 @@
   <div class="problem hidden" id="problem"></div>
   <div class="hints">
     <div class="hint sound hidden" id="soundHint">🔈 Коснитесь экрана, чтобы включить звук</div>
-    <div class="hint" id="showHint">Чтобы открыть настройки — удерживайте палец на экране</div>
+    <div class="hint" id="showHint">Коснитесь экрана — появятся кнопки звука и настроек</div>
+    <div class="controls gone" id="controls">
+      <button id="ctlSound">🔊 Звук включён</button>
+      <button id="ctlExit">⚙️ Настройки</button>
+    </div>
   </div>
 </div>
 
@@ -900,15 +918,44 @@ function unlockMedia() {
   }
 }
 
-function soundHint(on) { $('#soundHint').classList.toggle('hidden', !on); }
+/** Подсказка «коснитесь экрана»: 'sound' — чтобы включить звук, 'play' — чтобы iPad разрешил запустить видео */
+let tapHint = null;
+function setTapHint(kind) {
+  tapHint = kind;
+  const el = $('#soundHint');
+  el.classList.toggle('hidden', !kind);
+  if (kind) el.textContent = kind === 'play' ? '▶ Коснитесь экрана, чтобы запустить показ' : '🔈 Коснитесь экрана, чтобы включить звук';
+}
 
 function playEl(el) {
   el.muted = settings.muted || !unlocked;
-  soundHint(!settings.muted && !unlocked);
+  setTapHint(!settings.muted && !unlocked ? 'sound' : null);
+  const blocked = (err) => err && err.name === 'NotAllowedError';
   const p = el.play();
-  if (p) p.catch(() => {
-    if (!el.muted) { el.muted = true; soundHint(true); const q = el.play(); if (q) q.catch(() => {}); }
+  if (p) p.catch((err) => {
+    if (!blocked(err) || el !== active) return;
+    if (el.muted) { setTapHint('play'); return; }
+    // со звуком iPad не разрешил — пробуем без звука
+    el.muted = true;
+    const q = el.play();
+    if (q) q.then(() => setTapHint('sound')).catch((e) => { if (blocked(e)) setTapHint('play'); });
   });
+}
+
+// Кнопки «звук» и «настройки» — показываются на несколько секунд после касания
+let controlsTimer = null;
+function renderControls() {
+  $('#ctlSound').textContent = settings.muted ? '🔇 Звук выключен' : '🔊 Звук включён';
+}
+function showControls() {
+  renderControls();
+  $('#controls').classList.remove('gone');
+  clearTimeout(controlsTimer);
+  controlsTimer = setTimeout(() => $('#controls').classList.add('gone'), 6000);
+}
+function hideControls() {
+  clearTimeout(controlsTimer);
+  $('#controls').classList.add('gone');
 }
 
 function warm(el) {
@@ -951,7 +998,10 @@ function startShow(fromTap) {
   if (fromTap) {
     unlockMedia();
     if (!navigator.standalone) {
-      try { (showEl.requestFullscreen || showEl.webkitRequestFullscreen || function () {}).call(showEl); } catch (e) {}
+      try {
+        const p = (showEl.requestFullscreen || showEl.webkitRequestFullscreen || function () {}).call(showEl);
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
     }
   }
   requestWake();
@@ -959,6 +1009,7 @@ function startShow(fromTap) {
   hint.classList.remove('gone');
   clearTimeout(show.hintTimer);
   show.hintTimer = setTimeout(() => hint.classList.add('gone'), 6000);
+  showControls();
   show.list = playable();
   playCurrent(true);
 }
@@ -977,14 +1028,18 @@ function stopShow() {
   still.removeAttribute('src');
   setCaption(null);
   setProblem(null);
-  soundHint(false);
+  setTapHint(null);
+  hideControls();
   showEl.classList.add('hidden');
   document.body.classList.remove('showing');
   try { if (wakeLock) wakeLock.release(); } catch (e) {}
   wakeLock = null;
   try {
     const fs = document.fullscreenElement || document.webkitFullscreenElement;
-    if (fs) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    if (fs) {
+      const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      if (p && p.catch) p.catch(() => {});
+    }
   } catch (e) {}
   renderAll();
 }
@@ -1004,7 +1059,7 @@ function playCurrent(reset) {
     for (const v of [vA, vB]) { v.pause(); v.classList.remove('on'); }
     still.classList.remove('on');
     setCaption(null);
-    setProblem('Нет роликов для показа.<br>Удерживайте палец на экране, чтобы открыть настройки и добавить видео.');
+    setProblem('Нет роликов для показа.<br>Коснитесь экрана и нажмите «Настройки», чтобы добавить видео.');
     return;
   }
   if (show.index >= show.list.length || show.index < 0) show.index = 0;
@@ -1069,7 +1124,7 @@ function skipBroken() {
     for (const v of [vA, vB]) { v.pause(); v.classList.remove('on'); }
     still.classList.remove('on');
     setCaption(null);
-    setProblem('Не получается показать ни один файл.<br>Откройте настройки и проверьте ролики.');
+    setProblem('Не получается показать ни один файл.<br>Коснитесь экрана, нажмите «Настройки» и проверьте ролики.');
     return;
   }
   advance(true);
@@ -1116,7 +1171,7 @@ function watchdog() {
   if (active.paused) playEl(active);
 }
 
-// Касания в показе: короткое — включить звук, долгое — выйти в настройки
+// Касания в показе: короткое — показать кнопки и включить звук, долгое — сразу выйти в настройки
 let pressTimer = null;
 let longPressed = false;
 let swallowClicksUntil = 0;
@@ -1130,12 +1185,24 @@ showEl.addEventListener('pointerdown', () => {
   }, 1500);
 });
 for (const type of ['pointerup', 'pointercancel']) showEl.addEventListener(type, () => clearTimeout(pressTimer));
-showEl.addEventListener('click', () => {
-  if (longPressed) return;
-  if (!unlocked) unlockMedia();
-  if (!settings.muted && show.currentKind === 'video') { active.muted = false; const p = active.play(); if (p) p.catch(() => {}); }
-  soundHint(false);
+showEl.addEventListener('click', (e) => {
+  if (longPressed || !show.running || e.target.closest('#controls')) return;
+  if (!unlocked || tapHint === 'play') unlockMedia();
+  if (show.currentKind === 'video') playEl(active);
+  setTapHint(null);
+  showControls();
 });
+$('#ctlSound').addEventListener('click', () => {
+  if (!show.running) return;
+  settings.muted = !settings.muted;
+  saveSettings();
+  if (!unlocked) unlockMedia();
+  if (show.currentKind === 'video') playEl(active);
+  setTapHint(null);
+  showControls();
+});
+$('#ctlExit').addEventListener('click', () => { if (show.running) stopShow(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && show.running) stopShow(); });
 showEl.addEventListener('contextmenu', (e) => e.preventDefault());
 // после долгого нажатия не даём «пальцу» нажать кнопку под ним
 document.addEventListener('click', (e) => {
